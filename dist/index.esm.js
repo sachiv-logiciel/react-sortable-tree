@@ -1329,10 +1329,10 @@ function insertNode(_ref22) {
     currentDepth: -1
   });
 
-  if (!('insertedTreeIndex' in insertResult)) {
-		console.log(insertResult);
-    return null;
-  }
+  // if (!('insertedTreeIndex' in insertResult)) {
+	// 	console.log(insertResult);
+  //   return null;
+  // }
 
   var treeIndex = insertResult.insertedTreeIndex;
   return {
