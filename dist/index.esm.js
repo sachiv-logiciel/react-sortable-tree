@@ -1330,6 +1330,7 @@ function insertNode(_ref22) {
   });
 
   if (!('insertedTreeIndex' in insertResult)) {
+		console.log(insertResult);
     return null;
   }
 
