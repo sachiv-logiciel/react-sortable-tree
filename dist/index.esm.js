@@ -1329,10 +1329,9 @@ function insertNode(_ref22) {
     currentDepth: -1
   });
 
-  // if (!('insertedTreeIndex' in insertResult)) {
-	// 	console.log(insertResult);
-  //   return null;
-  // }
+  if (!('insertedTreeIndex' in insertResult)) {
+    throw new Error('No suitable position found to insert.');
+  }
 
   var treeIndex = insertResult.insertedTreeIndex;
   return {
@@ -2247,35 +2246,6 @@ function defaultSearchMethod(_ref2) {
   return stringSearch('title', searchQuery, node, path, treeIndex) || stringSearch('subtitle', searchQuery, node, path, treeIndex);
 }
 
-var memoize = function memoize(f) {
-  var savedArgsArray = [];
-  var savedKeysArray = [];
-  var savedResult = null;
-  return function (args) {
-    var keysArray = Object.keys(args).sort();
-    var argsArray = keysArray.map(function (key) {
-      return args[key];
-    }); // If the arguments for the last insert operation are different than this time,
-    // recalculate the result
-
-    if (argsArray.length !== savedArgsArray.length || argsArray.some(function (arg, index) {
-      return arg !== savedArgsArray[index];
-    }) || keysArray.some(function (key, index) {
-      return key !== savedKeysArray[index];
-    })) {
-      savedArgsArray = argsArray;
-      savedKeysArray = keysArray;
-      savedResult = f(args);
-    }
-
-    return savedResult;
-  };
-};
-
-var memoizedInsertNode = memoize(insertNode);
-var memoizedGetFlatDataFromTree = memoize(getFlatDataFromTree);
-var memoizedGetDescendantCount = memoize(getDescendantCount);
-
 var DndManager =
 /*#__PURE__*/
 function () {
@@ -2349,40 +2319,34 @@ function () {
 
       if (targetDepth >= abovePath.length && typeof aboveNode.children === 'function') {
         return false;
-      }
+      } // if (typeof this.customCanDrop === 'function') {
+      //   const { node } = monitor.getItem();
+      // 	let addedResult;
+      // 	try {
+      // 		addedResult = memoizedInsertNode({
+      // 			treeData: this.treeData,
+      // 			newNode: node,
+      // 			depth: targetDepth,
+      // 			getNodeKey: this.getNodeKey,
+      // 			minimumTreeIndex: dropTargetProps.listIndex,
+      // 			expandParent: true,
+      // 		});
+      // 	} catch (e) {
+      // 		// FIX: this is a temporary fix because the above code sometimes throws an exception. An issue has been raised
+      //     // with the original project https://github.com/fritz-c/react-sortable-tree/issues/259.
+      //     return false;
+      // 	}
+      //   // return this.customCanDrop({
+      //   //   node,
+      //   //   prevPath: monitor.getItem().path,
+      //   //   prevParent: monitor.getItem().parentNode,
+      //   //   prevTreeIndex: monitor.getItem().treeIndex, // Equals -1 when dragged from external tree
+      //   //   nextPath: addedResult.path,
+      //   //   nextParent: addedResult.parentNode,
+      //   //   nextTreeIndex: addedResult.treeIndex,
+      //   // });
+      // }
 
-      if (typeof this.customCanDrop === 'function') {
-        var _monitor$getItem = monitor.getItem(),
-            node = _monitor$getItem.node;
-
-        var addedResult;
-
-        try {
-          addedResult = memoizedInsertNode({
-            treeData: this.treeData,
-            newNode: node,
-            depth: targetDepth,
-            getNodeKey: this.getNodeKey,
-            minimumTreeIndex: dropTargetProps.listIndex,
-            expandParent: true
-          });
-        } catch (e) {
-          // FIX: this is a temporary fix because the above code sometimes throws an exception. An issue has been raised
-          // with the original project https://github.com/fritz-c/react-sortable-tree/issues/259.
-          return false;
-        }
-
-        return this.customCanDrop({
-          node: node,
-          prevPath: monitor.getItem().path,
-          prevParent: monitor.getItem().parentNode,
-          prevTreeIndex: monitor.getItem().treeIndex,
-          // Equals -1 when dragged from external tree
-          nextPath: addedResult.path,
-          nextParent: addedResult.parentNode,
-          nextTreeIndex: addedResult.treeIndex
-        });
-      }
 
       return true;
     }
@@ -2489,10 +2453,10 @@ function () {
 
       var placeholderDropTarget = {
         drop: function drop(dropTargetProps, monitor) {
-          var _monitor$getItem2 = monitor.getItem(),
-              node = _monitor$getItem2.node,
-              path = _monitor$getItem2.path,
-              treeIndex = _monitor$getItem2.treeIndex;
+          var _monitor$getItem = monitor.getItem(),
+              node = _monitor$getItem.node,
+              path = _monitor$getItem.path,
+              treeIndex = _monitor$getItem.treeIndex;
 
           var result = {
             node: node,
@@ -2582,6 +2546,35 @@ function slideRows(rows, fromIndex, toIndex) {
   var rowsWithoutMoved = [].concat(_toConsumableArray(rows.slice(0, fromIndex)), _toConsumableArray(rows.slice(fromIndex + count)));
   return [].concat(_toConsumableArray(rowsWithoutMoved.slice(0, toIndex)), _toConsumableArray(rows.slice(fromIndex, fromIndex + count)), _toConsumableArray(rowsWithoutMoved.slice(toIndex)));
 }
+
+var memoize = function memoize(f) {
+  var savedArgsArray = [];
+  var savedKeysArray = [];
+  var savedResult = null;
+  return function (args) {
+    var keysArray = Object.keys(args).sort();
+    var argsArray = keysArray.map(function (key) {
+      return args[key];
+    }); // If the arguments for the last insert operation are different than this time,
+    // recalculate the result
+
+    if (argsArray.length !== savedArgsArray.length || argsArray.some(function (arg, index) {
+      return arg !== savedArgsArray[index];
+    }) || keysArray.some(function (key, index) {
+      return key !== savedKeysArray[index];
+    })) {
+      savedArgsArray = argsArray;
+      savedKeysArray = keysArray;
+      savedResult = f(args);
+    }
+
+    return savedResult;
+  };
+};
+
+var memoizedInsertNode = memoize(insertNode);
+var memoizedGetFlatDataFromTree = memoize(getFlatDataFromTree);
+var memoizedGetDescendantCount = memoize(getDescendantCount);
 
 function _createSuper$3(Derived) {
   function isNativeReflectConstruct() {
